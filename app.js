@@ -7,13 +7,9 @@ require ('dotenv').config()
 
 app.use(express.json())
 
-
-
-
-
 //routes
 
-app.get('/hello', (req,res) => {
+app.get('/', (req,res) => {
     res.send('Hello in my Task Manager')
 })
 
