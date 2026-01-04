@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: task_manager
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app: 
+    build: .
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      PGHOST: db
+      PGUSER: admin
+      PGPASSWORD: admin123
+      PGDATABASE: task_manager
+      PGPORT: 5432
+    depends_on:
+      - db
+    volumes:
+      - .:/usr/src/app
+
+volumes:
+  pgdata:
