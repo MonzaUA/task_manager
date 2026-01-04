@@ -1,66 +1,81 @@
-const Task = require('../models/Task')
+const db = require('../db/knex')
 
-
-const getAllTasks = async (req, res) => {
+const getAllTasks = async (req,res) => {
     try {
-        const tasks = await Task.find({})
-        res.status(200).json({tasks})
-    } catch (error) {
-        res.status(500).json({msg:error})
-    }
-}
-
-const createTask = async (req,res) => {
-    try {
-        const task = await Task.create(req.body)
-        res.status(201).json(task)
-    } catch (error) {
-        res.status(500).json({msg:error})
-    }
-
-}
-
-const getTask = async (req, res) => {
-    try {
-        const {id:taskID} = req.params
-        const task = await Task.findOne({_id:taskID})
-    if(!task){
-        return res.status(404).json({msg:`No task with id: ${taskID}`})
-    }
-
-        res.status(200).json({task})
-    } catch (error) {
-        res.status(500).json({msg:error})
-    }
-
-}
-
-
-
-const deleteTask = async (req, res) => {
-    try {
-        const {id:taskID} = req.params
-        const task = await Task.findOneAndDelete({_id:taskID})
-    if (!task) {
-        return res.status(404).json({msg: `Task with such ID: ${taskID} not found`})
-    }
-    res.status(200).json({task})
+        const tasks = await db('tasks_knex').select('*')
+        res.status(200).json({ tasks })
     } catch (error) {
         res.status(500).json({msg: error})
     }
 }
 
-const updateTask = async (req, res) => {
+const getTask = async (req,res) => {
     try {
-        const {id:taskID} = req.params
+        const {id} = req.params
 
-        const task = await Task.findByIdAndUpdate({_id:taskID}, req.body, 
-            {new:true, runValidators:true}
-        )
+        const task = await db('tasks_knex')
+        .where({id})
+        .first()
 
-    if(!task){
-        return res.status(404).json({msg: `task with such id: ${taskID} does not exist`})
+        if(!task) {
+            res.status(404).json({msg: `Task with such ${id} does not exist`})
+        }
+        res.status(200).json({task})
+    } catch (error) {
+        res.status(500).json({error})
     }
+}
+
+const createTask = async (req, res) => {
+    try {
+        const {title, completed} = req.body
+
+        if(!title) {
+            return res.status(400).json({msg: `Title is required`})
+        }
+
+        const [task] = await db('tasks_knex')
+        .insert({title, completed})
+        .returning('*')
+        
+        res.status(201).json({task})
+    } catch (error) {
+        return res.status(500).json({msg: error})
+    }
+}
+
+const updateTask = async (req,res) => {
+    try {
+        const {id} = req.params
+
+        const [task] = await db('tasks_knex')
+        .where({id})
+        .update(req.body)
+        .returning('*')
+
+        if(!task) {
+            return res.status(404).json({msg: `no task with ID:${id}`})
+        }
+
+        res.status(200).json({task})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }
+}
+
+const deleteTask = async (req,res) => {
+    try {
+        const {id} = req.params
+
+        const [task] = await db ('tasks_knex')
+        .where({id})
+        .del()
+        .returning('*')
+
+        if(!task) {
+            return res.status(404).json({msg: `not found`})
+        }
         res.status(200).json({task})
     } catch (error) {
         res.status(500).json({error})
@@ -69,8 +84,9 @@ const updateTask = async (req, res) => {
 
 module.exports = {
     getAllTasks,
-    createTask,
     getTask,
+    createTask,
     updateTask,
     deleteTask
+
 }
