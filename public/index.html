@@ -33,8 +33,39 @@
     </form>
     <section class="tasks-container">
       <p class="loading-text">Loading...</p>
-      <div class="tasks"></div>
+      <div class="tasks" id="task-list"></div>
     </section>
+
+        <!-- Socket.io CDN -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <script>
+    const socket = io('http://localhost:4000');
+
+    socket.on('task_created', (task) => {
+      console.log('New task:', task);
+      const li = document.createElement('li');
+      li.id = `task-${task.id}`;
+      li.textContent = task.title;
+
+      document.getElementById('task-list').appendChild(li);
+    });
+
+    socket.on('task_updated', (task) => {
+      console.log('Task updated:', task);
+      const li = document.querySelector(`#task-${task.id}`);
+      if(li) li.textContent = task.title; // або інші поля
+    });
+
+
+    socket.on('task_deleted', (id) => {
+      console.log('Task deleted:', id);
+      const li = document.querySelector(`#task-${id}`);
+      if(li) li.remove();
+    });
+
+  </script>
+  
     <!-- axios -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
@@ -43,5 +74,8 @@
       referrerpolicy="no-referrer"
     ></script>
     <script src="./browser-app.js"></script>
+
+
+
   </body>
 </html>

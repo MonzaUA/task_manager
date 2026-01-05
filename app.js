@@ -14,8 +14,5 @@ app.use(express.static('./public'))
 app.use('/api/v1/tasks',tasks)
 app.use(notFound)
 
-const port = process.env.PORT || 4000;
 
-app.listen(port, () => {
-     console.log(`Server is listening on port ${port}`)
-})
+module.exports = app

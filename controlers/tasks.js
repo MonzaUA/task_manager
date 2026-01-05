@@ -37,6 +37,10 @@ const createTask = async (req, res) => {
         const [task] = await db('tasks_knex')
         .insert({title, completed})
         .returning('*')
+
+        const io = req.app.get('io')
+        io.emit('task_created', task)
+
         
         res.status(201).json({task})
     } catch (error) {
@@ -57,6 +61,9 @@ const updateTask = async (req,res) => {
             return res.status(404).json({msg: `no task with ID:${id}`})
         }
 
+        const io = req.app.get('io')
+        io.emit('task_updated', task)
+
         res.status(200).json({task})
     } catch (error) {
         console.log(error)
@@ -76,6 +83,10 @@ const deleteTask = async (req,res) => {
         if(!task) {
             return res.status(404).json({msg: `not found`})
         }
+
+        const io = req.app.get('io')
+        io.emit('task_deleted', id)
+
         res.status(200).json({task})
     } catch (error) {
         res.status(500).json({error})
