@@ -28,14 +28,18 @@ const getTask = async (req,res) => {
 
 const createTask = async (req, res) => {
     try {
-        const {title, completed} = req.body
+        const {title, completed, user, deadline} = req.body
 
         if(!title) {
             return res.status(400).json({msg: `Title is required`})
         }
 
+        if(!user){
+            return res.status(400).json({msg: `User is required`})
+        }
+
         const [task] = await db('tasks_knex')
-        .insert({title, completed})
+        .insert({title, completed, user, deadline})
         .returning('*')
         
         res.status(201).json({task})
