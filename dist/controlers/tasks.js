@@ -11,6 +11,10 @@ const getAllTasks = async (_req, res) => {
 const getTask = async (req, res) => {
     try {
         const { id } = req.params;
+        const idNum = Number(id);
+        if (!Number.isInteger(idNum)) {
+            return res.status(400).json({ msg: 'Invalid id' });
+        }
         const task = await db("tasks_knex").where('id', id).first();
         if (!task) {
             return res.status(404).json({ msg: `Task with such ${id} does not exist` });
