@@ -7,13 +7,14 @@ import { Router } from 'express' // const express = require('express')
 //     updateTask,
 //     deleteTask,
 // } = require('../controlers/tasks')
+import tasksController from '../controlers/tasks.js'
 
-import {getAllTasks,
+const {getAllTasks,
     getTask,
     createTask,
     updateTask,
     deleteTask
-} from '../controlers/tasks.js'
+} = tasksController
 
 
 const router = Router();
