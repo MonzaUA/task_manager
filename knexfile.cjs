@@ -7,11 +7,11 @@ module.exports = {
   development: {
     client: 'pg',
     connection: {
-      host: process.env.PGHOST || 'localhost',
-      user: process.env.PGUSER || 'admin',
-      password: process.env.PGPASSWORD || 'admin123',
-      database: process.env.PGDATABASE || 'task_manager',
-      port: Number(process.env.PGPORT) || 5433
+      host: process.env.PGHOST
+      user: process.env.PGUSER
+      password: process.env.PGPASSWORD
+      database: process.env.PGDATABASE
+      port: Number(process.env.PGPORT) 
     },
     migrations: {
       directory: './migrations'
