@@ -12,6 +12,6 @@
 
     "noEmit": true
   },
-  "include": ["**/*.js", "**/*.cjs", "routes/tasks.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["**/*.ts", "**/*.cjs", "routes/tasks.ts"],
+  "exclude": ["node_modules", "dist", "public", "migrations", "seeds"]
 }

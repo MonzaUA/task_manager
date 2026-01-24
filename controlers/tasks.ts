@@ -34,6 +34,11 @@ const getTask = async (req: Request<IdParams>, res: Response) => {
   try {
     const { id } = req.params;
 
+    const idNum = Number(id)
+    if (!Number.isInteger(idNum)) {
+        return res.status(400).json({msg: 'Invalid id'})
+    }
+
     const task = await db<TaskRow>("tasks_knex").where('id', id).first();
 
     if (!task) {
