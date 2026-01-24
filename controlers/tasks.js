@@ -1,6 +1,6 @@
-const db = require('../db/knex')
+import db from '../db/knex.js'  // const db = require('../db/knex')
 
-const getAllTasks = async (req,res) => {
+export const getAllTasks = async (req,res) => {
     try {
         const tasks = await db('tasks_knex').select('*')
         res.status(200).json({ tasks })
@@ -9,7 +9,7 @@ const getAllTasks = async (req,res) => {
     }
 }
 
-const getTask = async (req,res) => {
+export const getTask = async (req,res) => {
     try {
         const {id} = req.params
 
@@ -26,7 +26,7 @@ const getTask = async (req,res) => {
     }
 }
 
-const createTask = async (req, res) => {
+export const createTask = async (req, res) => {
     try {
         const {title, completed, user, deadline} = req.body
 
@@ -48,7 +48,7 @@ const createTask = async (req, res) => {
     }
 }
 
-const updateTask = async (req,res) => {
+export const updateTask = async (req,res) => {
     try {
         const {id} = req.params
 
@@ -68,7 +68,7 @@ const updateTask = async (req,res) => {
     }
 }
 
-const deleteTask = async (req,res) => {
+export const deleteTask = async (req,res) => {
     try {
         const {id} = req.params
 
@@ -84,13 +84,4 @@ const deleteTask = async (req,res) => {
     } catch (error) {
         res.status(500).json({error})
     }
-}
-
-module.exports = {
-    getAllTasks,
-    getTask,
-    createTask,
-    updateTask,
-    deleteTask
-
 }

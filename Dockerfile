@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "npx knex migrate:latest && node app.js"]
+CMD ["sh", "-c", "npx knex migrate:latest --knexfile knexfile.cjs && node app.js"]

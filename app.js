@@ -1,9 +1,9 @@
-const express = require('express')
-const app = express();
-const tasks = require('./routes/tasks')
-// require ('dotenv').config()
-const notFound = require('./middleware/not-found')
+import express from 'express' // const express = require('express')
+import tasks from './routes/tasks.js' // const tasks = require('./routes/tasks')
+import notFound from './middleware/not-found.js' // const notFound = require('./middleware/not-found')
 
+
+const app = express();
 
 //middleware
 
