@@ -5,7 +5,6 @@ type TaskRow = {
   title: string;
   completed: boolean;
   user: string;
-  deadline: string | null;
 };
 
 export const resolvers = {
@@ -25,23 +24,22 @@ export const resolvers = {
   Mutation: {
     createTask: async (
       _: unknown,
-      args: { title: string; user: string; completed?: boolean; deadline?: string }
+      args: { title: string; user: string; completed?: boolean}
     ): Promise<TaskRow> => {
       const [task] = await db<TaskRow>("tasks_knex")
         .insert({
           title: args.title,
           user: args.user,
           completed: args.completed ?? false,
-          deadline: args.deadline ?? null,
         })
         .returning("*");
-
+      
       return task;
     },
 
     updateTask: async (
       _: unknown,
-      args: { id: string; title?: string; user?: string; completed?: boolean; deadline?: string }
+      args: { id: string; title?: string; user?: string; completed?: boolean}
     ): Promise<TaskRow> => {
       const idNum = Number(args.id);
       if (!Number.isInteger(idNum)) {
@@ -52,7 +50,6 @@ export const resolvers = {
       if (args.title !== undefined) patch.title = args.title;
       if (args.user !== undefined) patch.user = args.user;
       if (args.completed !== undefined) patch.completed = args.completed;
-      if (args.deadline !== undefined) patch.deadline = args.deadline ?? null;
 
       const [task] = await db<TaskRow>("tasks_knex")
         .where("id", idNum)

@@ -1,6 +1,5 @@
 import express from 'express'
 import path from 'path'
-import router from './routes/tasks.js'
 import "dotenv/config";
 import {notFound} from './middleware/not-found.js'
 
@@ -15,9 +14,6 @@ const app = express()
 app.use(express.json())
 
 app.use(express.static(path.join(process.cwd(), "public")))
-
-//REST
-app.use('/api/v1/tasks', router)
 
 //Apollo & GraphQL
 async function start(){

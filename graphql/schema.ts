@@ -4,7 +4,6 @@ export const typeDefs = `#graphql
     title: String!
     completed: Boolean!
     user: String!
-    deadline: String
   }
 
   type Query {
@@ -17,7 +16,6 @@ export const typeDefs = `#graphql
       title: String!
       user: String!
       completed: Boolean
-      deadline: String
     ): Task!
 
     updateTask(
@@ -25,7 +23,6 @@ export const typeDefs = `#graphql
       title: String
       user: String
       completed: Boolean
-      deadline: String
     ): Task!
 
     deleteTask(id: ID!): Task!
