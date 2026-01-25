@@ -6,7 +6,6 @@ type TaskRow = {
     title: string
     completed: boolean
     user: string
-    deadline: string | null
 }
 
 type IdParams = {id: string }
@@ -15,7 +14,6 @@ type CreateTaskBody = {
     title: string
     completed?: boolean
     user: string
-    deadline?: string | null
 }
 
 type UpdateTaskBody = Partial<CreateTaskBody>
@@ -57,13 +55,13 @@ const createTask = async (
   res: Response
 ) => {
   try {
-    const { title, completed, user, deadline } = req.body;
+    const { title, completed, user} = req.body;
 
     if (!title) return res.status(400).json({ msg: "Title is required" });
     if (!user) return res.status(400).json({ msg: "User is required" });
 
     const [task] = await db<TaskRow>("tasks_knex")
-      .insert({ title, completed, user, deadline })
+      .insert({ title, completed, user})
       .returning("*");
 
     res.status(201).json({ task });

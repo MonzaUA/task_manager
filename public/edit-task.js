@@ -1,75 +1,122 @@
-const taskIDDOM = document.querySelector('.task-edit-id')
-const taskNameDOM = document.querySelector('.task-edit-name')
-const taskCompletedDOM = document.querySelector('.task-edit-completed')
-const taskUserDOM = document.querySelector('.task-edit-user')
-const taskDeadlineDOM = document.querySelector('.task-edit-deadline')
-const editFormDOM = document.querySelector('.single-task-form')
-const editBtnDOM = document.querySelector('.task-edit-btn')
-const formAlertDOM = document.querySelector('.form-alert')
-const params = window.location.search
-const id = new URLSearchParams(params).get('id')
-let tempName
+const GRAPHQL_URL = '/graphql';
+
+const taskIDDOM = document.querySelector('.task-edit-id');
+const taskNameDOM = document.querySelector('.task-edit-name');
+const taskCompletedDOM = document.querySelector('.task-edit-completed');
+const taskUserDOM = document.querySelector('.task-edit-user');
+const editFormDOM = document.querySelector('.single-task-form');
+const editBtnDOM = document.querySelector('.task-edit-btn');
+const formAlertDOM = document.querySelector('.form-alert');
+
+const params = window.location.search;
+const id = new URLSearchParams(params).get('id');
+let tempName;
+
+async function gql(query, variables = {}) {
+  const res = await fetch(GRAPHQL_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join('\n'));
+
+  return json.data;
+}
 
 const showTask = async () => {
   try {
-    const {
-      data: { task },
-    } = await axios.get(`/api/v1/tasks/${id}`)
-    const { id: taskID, completed, title, user, deadline } = task
+    const data = await gql(
+      `
+      query Task($id: ID!) {
+        task(id: $id) {
+          id
+          title
+          completed
+          user
+        }
+      }
+      `,
+      { id }
+    );
 
-    taskIDDOM.textContent = taskID
-    taskNameDOM.value = title
-    taskUserDOM.value = user || ''
-    taskDeadlineDOM.value = deadline ? new Date(deadline).toISOString().slice(0, 10) : ''
-    tempName = title
-    taskCompletedDOM.checked = completed
+    const task = data?.task;
+    if (!task) throw new Error('Task not found');
+
+    const { id: taskID, completed, title, user } = task;
+
+    taskIDDOM.textContent = taskID;
+    taskNameDOM.value = title;
+    taskUserDOM.value = user || '';
+    tempName = title;
+    taskCompletedDOM.checked = completed;
   } catch (error) {
-    console.log(error)
+    console.error(error);
   }
-}
+};
 
-showTask()
+showTask();
 
 editFormDOM.addEventListener('submit', async (e) => {
-  e.preventDefault()
-  editBtnDOM.textContent = 'Loading...'
+  e.preventDefault();
+  editBtnDOM.textContent = 'Loading...';
 
-  const taskName = taskNameDOM.value
-  const taskCompleted = taskCompletedDOM.checked
-  const taskUser = taskUserDOM.value
-  const taskDeadline = taskDeadlineDOM.value ? new Date(taskDeadlineDOM.value).toISOString() : null
+  const title = taskNameDOM.value;
+  const completed = taskCompletedDOM.checked;
+  const user = taskUserDOM.value;
 
   try {
-    const {
-      data: { task },
-    } = await axios.patch(`/api/v1/tasks/${id}`, {
-      title: taskName,
-      completed: taskCompleted,
-      user: taskUser,
-      deadline: taskDeadline,
-    })
+    const data = await gql(
+      `
+      mutation UpdateTask(
+        $id: ID!
+        $title: String
+        $user: String
+        $completed: Boolean
+      ) {
+        updateTask(
+          id: $id
+          title: $title
+          user: $user
+          completed: $completed
+        ) {
+          id
+          title
+          completed
+          user
+        }
+      }
+      `,
+      { id, title, user, completed }
+    );
 
-    const { id: taskID, completed, title, user, deadline } = task
+    const task = data?.updateTask;
+    if (!task) throw new Error('Update failed');
 
-    taskIDDOM.textContent = taskID
-    taskNameDOM.value = title
-    taskUserDOM.value = user || ''
-    taskDeadlineDOM.value = deadline ? new Date(deadline).toISOString().slice(0, 10) : ''
-    taskCompletedDOM.checked = completed
+    const { id: taskID, completed: newCompleted, title: newTitle, user: newUser } = task;
 
-    formAlertDOM.style.display = 'block'
-    formAlertDOM.textContent = `success, edited task`
-    formAlertDOM.classList.add('text-success')
+    taskIDDOM.textContent = taskID;
+    taskNameDOM.value = newTitle;
+    taskUserDOM.value = newUser || '';
+    taskCompletedDOM.checked = newCompleted;
+
+    formAlertDOM.style.display = 'block';
+    formAlertDOM.textContent = `success, edited task`;
+    formAlertDOM.classList.add('text-success');
   } catch (error) {
-    console.error(error)
-    taskNameDOM.value = tempName
-    formAlertDOM.style.display = 'block'
-    formAlertDOM.innerHTML = `error, please try again`
+    console.error(error);
+    taskNameDOM.value = tempName;
+
+    formAlertDOM.style.display = 'block';
+    formAlertDOM.innerHTML = `error, please try again`;
   }
 
-  editBtnDOM.textContent = 'Edit'
+  editBtnDOM.textContent = 'Edit';
   setTimeout(() => {
-    formAlertDOM.style.display = 'none'
-    formAlertDOM.classList.remove('text-success')
-  }, 3000)
-})
+    formAlertDOM.style.display = 'none';
+    formAlertDOM.classList.remove('text-success');
+  }, 3000);
+});
