@@ -8,6 +8,9 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { typeDefs } from './graphql/schema.js';
 import { resolvers } from './graphql/resolvers.js';
 
+import http from 'http'
+import { initWebSocket } from './ws.js';
+
 
 const app = express()
 
@@ -27,8 +30,13 @@ async function start(){
 
     const PORT = process.env.PORT ?? 3000
 
-    app.listen(PORT, ()=> {
-    console.log(`Server running on ${PORT}`); 
+    //WS
+    const httpServer = http.createServer(app)
+    initWebSocket(httpServer)
+
+    httpServer.listen(PORT, ()=> {
+        console.log(`Server ronning on ${PORT}`);
+        
     })
 }
 

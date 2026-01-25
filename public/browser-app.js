@@ -139,3 +139,22 @@ formDOM.addEventListener('submit', async (e) => {
     formAlertDOM.classList.remove('text-success');
   }, 3000);
 });
+
+(function connectWS() {
+  const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
+  const wsUrl = `${wsProtocol}://${location.host}/ws`;
+  const ws = new WebSocket(wsUrl);
+
+  ws.addEventListener('open', () => console.log('WS connected'));
+  ws.addEventListener('close', () => console.log('WS disconnected'));
+
+  ws.addEventListener('message', async (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'TASK_CREATED' || msg.type === 'TASK_UPDATED' || msg.type === 'TASK_DELETED') {
+        await showTasks();
+      }
+    } catch {}
+  });
+})();
+

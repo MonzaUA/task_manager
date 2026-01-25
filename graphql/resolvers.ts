@@ -1,4 +1,5 @@
 import db from "../db/knex.js";
+import { wsBroadcast } from "../ws.js";
 
 type TaskRow = {
   id: number;
@@ -32,10 +33,18 @@ export const resolvers = {
           user: args.user,
           completed: args.completed ?? false,
         })
-        .returning("*");
+        .returning("*")
+
+        //WS
+        wsBroadcast({
+          type: "TASK_CREATED",
+          payload: { id: task.id },
+            });
+
       
       return task;
     },
+
 
     updateTask: async (
       _: unknown,
@@ -54,9 +63,16 @@ export const resolvers = {
       const [task] = await db<TaskRow>("tasks_knex")
         .where("id", idNum)
         .update(patch)
-        .returning("*");
+        .returning("*")
+        
+      if (!task) throw new Error("Task not found")
 
-      if (!task) throw new Error("Task not found");
+      //WS
+      wsBroadcast({
+         type: "TASK_UPDATED",
+         payload: { id: task.id },
+          });
+
       return task;
     },
 
@@ -71,7 +87,14 @@ export const resolvers = {
         .del()
         .returning("*");
 
-      if (!task) throw new Error("Task not found");
+      if (!task) throw new Error("Task not found")
+        
+        //WS
+        wsBroadcast({
+          type: "TASK_DELETED",
+          payload: { id: task.id },
+            });
+
       return task;
     },
   },
