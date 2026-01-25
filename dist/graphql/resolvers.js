@@ -1,4 +1,5 @@
 import db from "../db/knex.js";
+import { wsBroadcast } from "../ws.js";
 export const resolvers = {
     Query: {
         tasks: async () => {
@@ -20,6 +21,11 @@ export const resolvers = {
                 completed: args.completed ?? false,
             })
                 .returning("*");
+            //WS
+            wsBroadcast({
+                type: "TASK_CREATED",
+                payload: { id: task.id },
+            });
             return task;
         },
         updateTask: async (_, args) => {
@@ -40,6 +46,11 @@ export const resolvers = {
                 .returning("*");
             if (!task)
                 throw new Error("Task not found");
+            //WS
+            wsBroadcast({
+                type: "TASK_UPDATED",
+                payload: { id: task.id },
+            });
             return task;
         },
         deleteTask: async (_, args) => {
@@ -53,6 +64,11 @@ export const resolvers = {
                 .returning("*");
             if (!task)
                 throw new Error("Task not found");
+            //WS
+            wsBroadcast({
+                type: "TASK_DELETED",
+                payload: { id: task.id },
+            });
             return task;
         },
     },
